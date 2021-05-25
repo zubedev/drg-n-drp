@@ -37,11 +37,26 @@ function validate(obj: Validatable) {
     return isValid;
 }
 
+enum ProjectStatus {Active, Finished}
+
+// Project class
+class Project {
+    constructor(
+        public id: string,
+        public title: string,
+        public desc: string,
+        public people: number,
+        public status: ProjectStatus
+    ) {}
+}
+
+type Listener = (items: Project[]) => void;
+
 // ProjectState class
 class ProjectState {
     private static instance: ProjectState;
-    private projects: any[] = [];
-    private listeners: any[] = [];
+    private projects: Project[] = [];
+    private listeners: Listener[] = [];
 
     private constructor() {}
 
@@ -51,13 +66,11 @@ class ProjectState {
         return this.instance;
     }
 
-    addListener(fn: Function) { this.listeners.push(fn); }
+    addListener(fn: Listener) { this.listeners.push(fn); }
 
     addProject(t: string, d: string, p:number) {
-        this.projects.push({
-            id: Math.random().toString(),
-            title: t, desc: d, people: p
-        });
+        this.projects.push(new Project(
+            Math.random().toString(), t, d, p, ProjectStatus.Active));
         for (const listenerFn of this.listeners) {
             listenerFn(this.projects.slice());
         }
@@ -71,7 +84,7 @@ class ProjectList {
     templateElem: HTMLTemplateElement;
     hostElem: HTMLDivElement;
     sectionElem: HTMLElement;
-    projects: any[];
+    projects: Project[];
 
     constructor(private type: 'active' | 'finished') {
         this.templateElem = document.getElementById('project-list') as HTMLTemplateElement;
@@ -82,7 +95,7 @@ class ProjectList {
         this.sectionElem.id = `${this.type}-projects`; // to apply css style
 
         this.projects = [];
-        projectState.addListener((projects: any[]) => {
+        projectState.addListener((projects: Project[]) => {
             this.projects = projects;
             this.renderProjects();
         });
