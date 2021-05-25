@@ -1,8 +1,8 @@
-import {ProjectBase} from "./base.js";
-import {projectState} from "../state/project.js";
-import {Validatable} from "../models/validatable.js";
-import {validate} from "../utils/validation.js";
-import {autobind} from "../decorators/autobind.js";
+import {ProjectBase} from "./base";
+import {projectState} from "../state/project";
+import {Validatable} from "../models/validatable";
+import {validate} from "../utils/validation";
+import {autobind} from "../decorators/autobind";
 
 // ProjectInput class
 export class ProjectInput extends ProjectBase<HTMLDivElement, HTMLFormElement> {

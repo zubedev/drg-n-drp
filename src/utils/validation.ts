@@ -1,4 +1,4 @@
-import { Validatable } from "../models/validatable.js";
+import { Validatable } from "../models/validatable";
 
 // Validation function
 export function validate(obj: Validatable) {
