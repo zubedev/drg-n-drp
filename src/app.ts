@@ -106,6 +106,27 @@ abstract class ProjectBase<T extends HTMLElement, U extends HTMLElement> {
     abstract renderContent(): void;
 }
 
+// ProjectItem class
+class ProjectItem extends ProjectBase<HTMLUListElement, HTMLLIElement> {
+    private project: Project;
+
+    constructor(hostId: string, project: Project) {
+        super('single-project', hostId, "beforeend", project.id);
+        this.project = project;
+
+        this.configure();
+        this.renderContent();
+    }
+
+    configure() {}
+
+    renderContent() {
+        this.element.querySelector('h2')!.textContent = this.project.title;
+        this.element.querySelector('h3')!.textContent = this.project.people.toString();
+        this.element.querySelector('p')!.textContent = this.project.desc;
+    }
+}
+
 // ProjectList class
 class ProjectList extends ProjectBase<HTMLDivElement, HTMLElement>{
     projects: Project[];
@@ -136,9 +157,7 @@ class ProjectList extends ProjectBase<HTMLDivElement, HTMLElement>{
         const listElem = document.getElementById(`${this.type}-projects-list`) as HTMLUListElement;
         listElem.innerHTML = ''; // clear the list for re-rendering
         for (const proj of this.projects) {
-            const listItem = document.createElement('li');
-            listItem.textContent = proj.title;
-            listElem.appendChild(listItem);
+            new ProjectItem(this.element.querySelector('ul')!.id, proj);
         }
     }
 }
@@ -168,7 +187,7 @@ class ProjectInput extends ProjectBase<HTMLDivElement, HTMLFormElement> {
         const enteredDesc = this.descInputEl.value.trim();
         const enteredPeople = this.peopleInputEl.value.trim();
 
-        // configure validatables
+        // configure validatable
         const validatableTitle: Validatable = {value: enteredTitle, required: true, minLength:5, maxLength: 50};
         const validatableDesc: Validatable = {value: enteredDesc, maxLength: 100};
         const validatablePeople: Validatable = {value: +enteredPeople, required: true, minVal: 1, maxVal: 9};
