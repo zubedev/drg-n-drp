@@ -37,11 +37,41 @@ function validate(obj: Validatable) {
     return isValid;
 }
 
+// ProjectState class
+class ProjectState {
+    private static instance: ProjectState;
+    private projects: any[] = [];
+    private listeners: any[] = [];
+
+    private constructor() {}
+
+    static getInstance() {
+        if (this.instance) { return this.instance; }
+        this.instance = new ProjectState();
+        return this.instance;
+    }
+
+    addListener(fn: Function) { this.listeners.push(fn); }
+
+    addProject(t: string, d: string, p:number) {
+        this.projects.push({
+            id: Math.random().toString(),
+            title: t, desc: d, people: p
+        });
+        for (const listenerFn of this.listeners) {
+            listenerFn(this.projects.slice());
+        }
+    }
+}
+
+const projectState = ProjectState.getInstance();
+
 // ProjectList class
 class ProjectList {
     templateElem: HTMLTemplateElement;
     hostElem: HTMLDivElement;
     sectionElem: HTMLElement;
+    projects: any[];
 
     constructor(private type: 'active' | 'finished') {
         this.templateElem = document.getElementById('project-list') as HTMLTemplateElement;
@@ -51,8 +81,23 @@ class ProjectList {
         this.sectionElem = importedNode.firstElementChild as HTMLElement;
         this.sectionElem.id = `${this.type}-projects`; // to apply css style
 
+        this.projects = [];
+        projectState.addListener((projects: any[]) => {
+            this.projects = projects;
+            this.renderProjects();
+        });
+
         this.attach();
         this.renderContent();
+    }
+
+    private renderProjects() {
+        const listElem = document.getElementById(`${this.type}-projects-list`) as HTMLUListElement;
+        for (const proj of this.projects) {
+            const listItem = document.createElement('li');
+            listItem.textContent = proj.title;
+            listElem.appendChild(listItem);
+        }
     }
 
     private renderContent() {
@@ -117,7 +162,11 @@ class ProjectInput {
     private submitHandler(event: Event) {
         event.preventDefault();
         const userInput = this.gatherUserInput();
-        if (Array.isArray(userInput)) { console.log(userInput); this.clearInput(); }
+        if (Array.isArray(userInput)) {
+            const [t, d, p] = userInput;
+            projectState.addProject(t, d, p);
+            this.clearInput();
+        }
     }
 
     private configure() { this.formElem.addEventListener('submit', this.submitHandler)}

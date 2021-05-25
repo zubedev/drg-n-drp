@@ -3,5 +3,5 @@
   "injectChanges": false,
   "files": ["./src/**/*.{html,htm,css,js,ts}"],
   "watchOptions": { "ignored": "node_modules" },
-  "server": { "baseDir": "./dist" }
+  "server": { "baseDir": "./" }
 }
