@@ -6,6 +6,37 @@ function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
     } as PropertyDescriptor
 }
 
+// Validation interface
+interface Validatable {
+    value: string | number;
+    required?: boolean;
+    minLength?: number;
+    maxLength?: number;
+    minVal?: number;
+    maxVal?: number;
+}
+
+// Validation function
+function validate(obj: Validatable) {
+    let isValid = true;
+    if (obj.required) { // required = true
+        isValid = isValid && obj.value.toString().trim().length !== 0;
+    }
+    if (typeof obj.value === 'string' && obj.minLength != null) { // or undefined, can be 0
+        isValid = isValid && obj.value.trim().length >= obj.minLength;
+    }
+    if (typeof obj.value === 'string' && obj.maxLength != null) { // or undefined, can be 0
+        isValid = isValid && obj.value.trim().length <= obj.maxLength;
+    }
+    if (typeof obj.value === 'number' && obj.minVal != null) { // or undefined, can be 0
+        isValid = isValid && obj.value >= obj.minVal;
+    }
+    if (typeof obj.value === 'number' && obj.maxVal != null) { // or undefined, can be 0
+        isValid = isValid && obj.value <= obj.maxVal;
+    }
+    return isValid;
+}
+
 // ProjectInput class
 class ProjectInput {
     templateElem: HTMLTemplateElement;
@@ -37,11 +68,16 @@ class ProjectInput {
         const enteredDesc = this.descInputEl.value.trim();
         const enteredPeople = this.peopleInputEl.value.trim();
 
+        // configure validatables
+        const validatableTitle: Validatable = {value: enteredTitle, required: true, minLength:5, maxLength: 50};
+        const validatableDesc: Validatable = {value: enteredDesc, maxLength: 100};
+        const validatablePeople: Validatable = {value: +enteredPeople, required: true, minVal: 1, maxVal: 9};
+
         // empty or blank validation
-        if (enteredTitle.length === 0 || enteredDesc.length === 0 || enteredPeople.length === 0) {
-            alert("Invalid input: missing fields! Please try again!");
-        } else {
+        if (validate(validatableTitle) && validate(validatableDesc) && validate(validatablePeople)) {
             return [enteredTitle, enteredDesc, +enteredPeople];
+        } else {
+            alert("Invalid input, please try again!");
         }
     }
 
